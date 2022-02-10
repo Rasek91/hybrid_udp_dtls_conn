@@ -2,109 +2,109 @@
 
 A net.Conn implementation which can change dtls.Conn from udp.Conn when a DTLS
 ClientHello received. It should be used with udp.Listen.Accept() as underlying
-connection for Buffer_Conn and the Buffer_coon should be used for Conn as
+connection for BufferConn and the BufferConn should be used for Conn as
 underlying connection. For implementation example check the test files.
 
 ## Usage
 
-#### type Buffer_Conn
+#### type BufferConn
 
 ```go
-type Buffer_Conn struct {
+type BufferConn struct {
 }
 ```
 
-Buffer_Conn implements the net.Conn interface. It has an internal buffer and
-when there is data in it the Read returns the data from the buffer and delete
-the buffer instead of reading the underlying connection.
+BufferConn implements the net.Conn interface. It has an internal buffer and when
+there is data in it the Read returns the data from the buffer and delete the
+buffer instead of reading the underlying connection.
 
-#### func  Create_Buffer_Conn
+#### func  CreateBufferConn
 
 ```go
-func Create_Buffer_Conn(connection net.Conn) *Buffer_Conn
+func CreateBufferConn(connection net.Conn) *BufferConn
 ```
 
-Create_Buffer_Conn returns a new Buffer_Conn using connection as the underlying
+CreateBufferConn returns a new BufferConn using connection as the underlying
 connection.
 
-#### func (*Buffer_Conn) Close
+#### func (*BufferConn) Close
 
 ```go
-func (connection *Buffer_Conn) Close() error
+func (connection *BufferConn) Close() error
 ```
 
 Close the underlying connection.
 
-#### func (*Buffer_Conn) Get_Buffer
+#### func (*BufferConn) GetBuffer
 
 ```go
-func (connection *Buffer_Conn) Get_Buffer() []byte
+func (connection *BufferConn) GetBuffer() []byte
 ```
 
-Get_Buffer read the data from the buffer and delete the data from it.
+GetBuffer read the data from the buffer and delete the data from it.
 
-#### func (*Buffer_Conn) LocalAddr
+#### func (*BufferConn) LocalAddr
 
 ```go
-func (connection *Buffer_Conn) LocalAddr() net.Addr
+func (connection *BufferConn) LocalAddr() net.Addr
 ```
 
 LocalAddr of the underlying connection.
 
-#### func (*Buffer_Conn) Read
+#### func (*BufferConn) Read
 
 ```go
-func (connection *Buffer_Conn) Read(buffer []byte) (int, error)
+func (connection *BufferConn) Read(buffer []byte) (int, error)
 ```
 
 Read returns the data from the buffer and delete the buffer instead of reading
 the underlying connection if the internal buffer has data.
 
-#### func (*Buffer_Conn) RemoteAddr
+#### func (*BufferConn) RemoteAddr
 
 ```go
-func (connection *Buffer_Conn) RemoteAddr() net.Addr
+func (connection *BufferConn) RemoteAddr() net.Addr
 ```
 
 RemoteAddr of the underlying connection.
 
-#### func (*Buffer_Conn) SetDeadline
+#### func (*BufferConn) SetBuffer
 
 ```go
-func (connection *Buffer_Conn) SetDeadline(time time.Time) error
+func (connection *BufferConn) SetBuffer(buffer []byte)
+```
+
+SetBuffer the internal buffer will be equal to buffer. If there was data in the
+internal buffer it will be overwritten.
+
+#### func (*BufferConn) SetDeadline
+
+```go
+func (connection *BufferConn) SetDeadline(time time.Time) error
 ```
 
 SetDeadline to the underlying connection.
 
-#### func (*Buffer_Conn) SetReadDeadline
+#### func (*BufferConn) SetReadDeadline
 
 ```go
-func (connection *Buffer_Conn) SetReadDeadline(time time.Time) error
+func (connection *BufferConn) SetReadDeadline(time time.Time) error
 ```
 
 SetReadDeadline to the underlying connection.
 
-#### func (*Buffer_Conn) SetWriteDeadline
+#### func (*BufferConn) SetWriteDeadline
 
 ```go
-func (connection *Buffer_Conn) SetWriteDeadline(time time.Time) error
+func (connection *BufferConn) SetWriteDeadline(time time.Time) error
 ```
 
 SetWriteDeadline to the underlying connection.
 
-#### func (*Buffer_Conn) Set_Buffer
+#### func (*BufferConn) Write
 
 ```go
-func (connection *Buffer_Conn) Set_Buffer(buffer []byte)
-```
-
-Set_Buffer the internal buffer will be equal to buffer. If there was data in the
-internal buffer it will be overwritten.
-
-#### func (*Buffer_Conn) Write
-
-```go
-func (connection *Buffer_Conn) Write(buffer []byte) (int, error)
+func (connection *BufferConn) Write(buffer []byte) (int, error)
 ```
 
 Write to the underlying connection.
@@ -119,13 +119,13 @@ type Conn struct {
 Conn implements the net.Conn interface. Which can change the underlying
 connection from UDP to DTLS if a DTLS ClientHello received.
 
-#### func  Create_Conn
+#### func  New
 
 ```go
-func Create_Conn(connection net.Conn, tls_config *dtls.Config) *Conn
+func New(connection net.Conn, tlsConfig *dtls.Config) *Conn
 ```
 
-Create_Conn returns a new Conn using connection converted to Buffer_Conn as the
+New returns a new Conn using connection converted to BufferConn as the
 underlying connection. The configuration config must be non-nil and must include
 at least one certificate or else set GetCertificate, if TLS will be added to the
 connection.
@@ -138,21 +138,21 @@ func (connection *Conn) Close() error
 
 Close the underlying connection.
 
-#### func (*Conn) Get_TLS
+#### func (*Conn) GetTls
 
 ```go
-func (connection *Conn) Get_TLS() bool
+func (connection *Conn) GetTls() bool
 ```
 
-Get_TLS returns true if the underlying connection is using TLS and false if not.
+GetTls returns true if the underlying connection is using TLS and false if not.
 
-#### func (*Conn) Get_TLS_Config
+#### func (*Conn) GetTlsConfig
 
 ```go
-func (connection *Conn) Get_TLS_Config() *dtls.Config
+func (connection *Conn) GetTlsConfig() *dtls.Config
 ```
 
-Get_TLS_Config returns the TLS server configuration.
+GetTlsConfig returns the TLS server configuration.
 
 #### func (*Conn) LocalAddr
 
@@ -195,6 +195,15 @@ func (connection *Conn) SetReadDeadline(time time.Time) error
 
 SetReadDeadline to the underlying connection.
 
+#### func (*Conn) SetTlsConfig
+
+```go
+func (connection *Conn) SetTlsConfig(tlsConfig *dtls.Config)
+```
+
+SetTlsConfig change the TLS server configuration. New connection will be not
+generated if you change it and TLS is already in use.
+
 #### func (*Conn) SetWriteDeadline
 
 ```go
@@ -202,15 +211,6 @@ func (connection *Conn) SetWriteDeadline(time time.Time) error
 ```
 
 SetWriteDeadline to the underlying connection.
-
-#### func (*Conn) Set_TLS_Config
-
-```go
-func (connection *Conn) Set_TLS_Config(tls_config *dtls.Config)
-```
-
-Set_TLS_Config change the TLS server configuration. New connection will be not
-generated if you change it and TLS is already in use.
 
 #### func (*Conn) Write
 
